@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>霍兰德职业兴趣量表（SDS）青少年版</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary: #4F6EF7;
+  --primary-light: #EEF1FE;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --bg: #F5F6FA;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-secondary: #64748B;
+  --border: #E2E8F0;
+  --radius: 16px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --r-color: #EF4444;
+  --i-color: #22C55E;
+  --a-color: #8B5CF6;
+  --s-color: #3B82F6;
+  --e-color: #F59E0B;
+  --c-color: #06B6D4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+}
+.container { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+.header {
+  background: var(--primary);
+  color: #fff;
+  padding: 20px 16px;
+  text-align: center;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-bottom: 16px;
+}
+.header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.header p { font-size: 13px; opacity: 0.85; }
+
+/* Progress Bar */
+.progress-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 12px;
+  z-index: 10;
+}
+.progress-info { display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:var(--text-secondary); }
+.progress-bar { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:4px; transition:width .4s ease; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+
+/* Form Fields */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 16px;
+  color: var(--text);
+  background: #FAFBFC;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+}
+
+/* Radio Group */
+.radio-group { display:flex; gap:8px; }
+.radio-btn {
+  flex:1;
+  text-align:center;
+  padding:12px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .2s;
+  background:#FAFBFC;
+  user-select:none;
+}
+.radio-btn:hover { border-color: var(--primary); }
+.radio-btn.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Question card */
+.q-num {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px; height:32px;
+  border-radius:50%;
+  background:var(--primary-light);
+  color:var(--primary);
+  font-size:13px;
+  font-weight:700;
+  flex-shrink:0;
+}
+.q-text { font-size:15px; line-height:1.5; margin-bottom:12px; }
+.q-options { display:flex; gap:10px; }
+.q-option {
+  flex:1;
+  text-align:center;
+  padding:13px 10px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .2s;
+  background:#FAFBFC;
+  user-select:none;
+}
+.q-option:hover { border-color:var(--primary); }
+.q-option.yes.selected { border-color:var(--success); background:#F0FDF4; color:var(--success); }
+.q-option.no.selected { border-color:var(--danger); background:#FEF2F2; color:var(--danger); }
+
+/* Buttons */
+.btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:14px 28px;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+  transition:all .2s;
+  text-decoration:none;
+}
+.btn-primary { background:var(--primary); color:#fff; width:100%; }
+.btn-primary:hover { opacity:0.9; }
+.btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
+.btn-outline { background:#fff; color:var(--primary); border:2px solid var(--primary); }
+.btn-outline:hover { background:var(--primary-light); }
+.btn-sm { padding:8px 16px; font-size:13px; border-radius:10px; }
+
+/* Paging */
+.page-nav { display:flex; gap:10px; margin-top:16px; }
+.page-nav .btn { flex:1; }
+
+/* Results */
+.result-header {
+  text-align:center;
+  padding:24px 16px;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  border-radius:var(--radius);
+  margin-bottom:16px;
+}
+.holland-code {
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:16px 0;
+}
+.hc-letter {
+  width:56px; height:56px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  font-weight:900;
+  color:#fff;
+}
+.hc-letter.r { background:var(--r-color); }
+.hc-letter.i { background:var(--i-color); }
+.hc-letter.a { background:var(--a-color); }
+.hc-letter.s { background:var(--s-color); }
+.hc-letter.e { background:var(--e-color); }
+.hc-letter.c { background:var(--c-color); }
+
+.score-row {
+  display:flex;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.score-row:last-child { border-bottom:none; }
+.score-label {
+  width:80px;
+  font-weight:700;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.score-dot {
+  width:10px; height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.score-bar-wrap { flex:1; height:10px; background:var(--border); border-radius:5px; overflow:hidden; margin:0 12px; }
+.score-bar-fill { height:100%; border-radius:5px; transition:width .6s ease; }
+.score-val { font-weight:700; font-size:14px; width:40px; text-align:right; }
+
+.radar-wrap { max-width:340px; margin:0 auto; }
+
+.type-card {
+  border-left:4px solid;
+  padding:14px 16px;
+  margin-bottom:12px;
+  background:#FAFBFC;
+  border-radius:0 12px 12px 0;
+}
+.type-card h4 { font-size:15px; margin-bottom:4px; }
+.type-card p { font-size:13px; color:var(--text-secondary); }
+
+.recommend-table { width:100%; font-size:12px; border-collapse:collapse; }
+.recommend-table th, .recommend-table td {
+  padding:8px 6px;
+  border:1px solid var(--border);
+  text-align:left;
+}
+.recommend-table th { background:#F8FAFC; font-weight:600; font-size:11px; }
+
+/* Tabs */
+.tabs { display:flex; gap:4px; margin-bottom:16px; overflow-x:auto; }
+.tab {
+  padding:8px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+  border:2px solid var(--border);
+  background:#fff;
+  color:var(--text-secondary);
+  transition:all .2s;
+}
+.tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+/* Warning */
+.warning-box {
+  background:#FFFBEB;
+  border:1px solid #FDE68A;
+  border-radius:12px;
+  padding:14px;
+  font-size:13px;
+  color:#92400E;
+  margin-top:16px;
+}
+
+/* Hidden sections */
+.section { display:none; }
+.section.active { display:block; }
+
+/* responsiveness */
+@media (max-width:374px) {
+  .hc-letter { width:46px; height:46px; font-size:22px; }
+  .q-text { font-size:14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ====== SECTION 0: 欢迎页 ====== -->
+  <div class="section active" id="sec-welcome">
+    <div class="header">
+      <h1>🔍 霍兰德职业兴趣量表</h1>
+      <p>SDS 青少年版 · 60题 · 约8-15分钟</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 指导语</div>
+      <div class="card-desc">
+        <p>本问卷旨在帮助你了解自己的<strong>职业兴趣倾向</strong>，为未来的学业规划和职业选择提供参考。</p>
+        <p style="margin-top:10px;"><strong>作答方式：</strong>根据第一印象选择每道题的<strong>"是"或"否"</strong>。</p>
+      </div>
+      <div style="background:#F0F9FF; border-radius:12px; padding:14px; font-size:13px; color:#0369A1;">
+        <p style="font-weight:700; margin-bottom:6px;">⚠️ 重要提醒：</p>
+        <ul style="padding-left:18px; line-height:2;">
+          <li>答案没有<strong>对错好坏</strong>之分，按第一印象作答</li>
+          <li>每一题都必须作答，不要遗漏</li>
+          <li>不要过多思考，第一反应最准确</li>
+          <li>本问卷结果仅供参考</li>
+        </ul>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="showSection('sec-info')">
+      开始填写 → 基本信息
+    </button>
+  </div>
+
+  <!-- ====== SECTION 1: 基本信息 ====== -->
+  <div class="section" id="sec-info">
+    <div class="progress-wrap">
+      <div class="progress-info"><span>📝 基本信息</span><span>步骤 1 / 8</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:5%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">👤 基本信息系统</div>
+      <div class="form-group">
+        <label class="form-label">姓名（或昵称）</label>
+        <input class="form-input" id="info-name" placeholder="请输入你的姓名" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label class="form-label">性别</label>
+        <div class="radio-group" id="info-gender">
+          <div class="radio-btn" data-value="男" onclick="selectRadio(this,'info-gender')">👦 男</div>
+          <div class="radio-btn" data-value="女" onclick="selectRadio(this,'info-gender')">👧 女</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">年龄</label>
+        <input class="form-input" id="info-age" type="number" placeholder="请输入年龄" min="10" max="25" style="max-width:160px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">年级</label>
+        <select class="form-select" id="info-grade">
+          <option value="">请选择年级</option>
+          <option>初一</option><option>初二</option><option>初三</option>
+          <option>高一</option><option>高二</option><option>高三</option>
+          <option>大一</option><option>大二</option><option>其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">文理倾向</label>
+        <div class="radio-group" id="info-direction">
+          <div class="radio-btn" data-value="偏文" onclick="selectRadio(this,'info-direction')">📖 偏文</div>
+          <div class="radio-btn" data-value="偏理" onclick="selectRadio(this,'info-direction')">🔬 偏理</div>
+          <div class="radio-btn" data-value="尚未确定" onclick="selectRadio(this,'info-direction')">❓ 未确定</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-nav">
+      <button class="btn btn-outline" onclick="showSection('sec-welcome')">← 返回</button>
+      <button class="btn btn-primary" onclick="goQuestions()">开始答题 →</button>
+    </div>
+  </div>
+
+  <!-- ====== SECTIONS 2-7: 题目页（动态生成） ====== -->
+  <div class="section" id="sec-questions">
+    <div class="progress-wrap">
+      <div class="progress-info"><span id="qp-label">📋 第1-10题</span><span id="qp-step">步骤 2 / 8</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="qp-fill" style="width:12%"></div></div>
+    </div>
+    <div id="questions-container"></div>
+    <div class="page-nav" id="q-nav"></div>
+  </div>
+
+  <!-- ====== SECTION 8: 结果页 ====== -->
+  <div class="section" id="sec-results">
+    <div class="result-header">
+      <p style="font-size:13px;opacity:0.85;">你的霍兰德职业兴趣代码</p>
+      <div class="holland-code" id="hc-display"></div>
+      <p style="font-size:13px;opacity:0.85;" id="hc-types"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 各维度得分</div>
+      <div id="score-bars"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 得分雷达图</div>
+      <div class="radar-wrap"><canvas id="radarChart" height="300"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 结果质量分析</div>
+      <div id="quality-analysis"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔎 类型深度解读</div>
+      <div class="tabs" id="type-tabs"></div>
+      <div id="type-detail"></div>
+    </div>
+
+    <div class="card" id="career-card">
+      <div class="card-title">🎓 推荐方向</div>
+      <div id="career-recommend"></div>
+    </div>
+
+    <div class="card" id="subject-card">
+      <div class="card-title">📚 高中选科建议</div>
+      <div id="subject-recommend"></div>
+    </div>
+
+    <div class="card" id="activity-card">
+      <div class="card-title">🏃 推荐课外活动</div>
+      <div id="activity-recommend"></div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ 重要说明：</strong>本报告基于霍兰德职业兴趣理论，旨在提供参考方向，并非绝对定论。职业选择还需考虑个人能力、价值观、外部环境等因素。青少年兴趣会随成长变化，建议每1-2年重新评估。
+    </div>
+
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn btn-outline btn-sm" onclick="restartAll()">🔄 重新填写</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== 数据定义 ====================
+
+// 60道题目：id, text, dimension(R/I/A/S/E/C), scoresOn("yes"/"no")
+const QUESTIONS = [
+  {id:1, text:"我喜欢把一件事情做完后再做另一件事", dim:"S", on:"no"},
+  {id:2, text:"在工作中我喜欢独自筹划，不愿受别人干涉", dim:"R", on:"yes"},
+  {id:3, text:"在集体讨论中，我往往保持沉默", dim:"E", on:"no"},
+  {id:4, text:"我喜欢做戏剧、音乐、歌舞、新闻采访等方面的工作", dim:"A", on:"yes"},
+  {id:5, text:"每次写信我都一挥而就，不再重复", dim:"C", on:"no"},
+  {id:6, text:"我经常不停地思考某一问题，直到想出正确的答案", dim:"I", on:"yes"},
+  {id:7, text:"对别人借我的和我借别人的东西，我都能记得很清楚", dim:"C", on:"yes"},
+  {id:8, text:"我喜欢抽象思维的工作，不喜欢动手的工作", dim:"I", on:"yes"},
+  {id:9, text:"我喜欢成为人们注意的焦点", dim:"A", on:"yes"},
+  {id:10, text:"我喜欢不时地夸耀一下自己取得的好成就", dim:"A", on:"yes"},
+  {id:11, text:"我曾经渴望有机会参加探险", dim:"E", on:"yes"},
+  {id:12, text:"当我一个人独处时，会感到更愉快", dim:"S", on:"no"},
+  {id:13, text:"我喜欢在做事情前，对此事情做出细致的安排", dim:"R", on:"yes"},
+  {id:14, text:"我讨厌修理自行车、电器一类的工作", dim:"R", on:"no"},
+  {id:15, text:"我喜欢参加各种各样的聚会", dim:"S", on:"no"},
+  {id:16, text:"我愿意从事虽然工资少、但是比较稳定的职业", dim:"E", on:"no"},
+  {id:17, text:"音乐能使我陶醉", dim:"A", on:"yes"},
+  {id:18, text:"我办事很少思前想后", dim:"C", on:"no"},
+  {id:19, text:"我喜欢经常请示上级/老师", dim:"C", on:"yes"},
+  {id:20, text:"我喜欢需要运用智力的游戏", dim:"I", on:"yes"},
+  {id:21, text:"我很难做那种需要持续集中注意力的工作", dim:"I", on:"no"},
+  {id:22, text:"我喜欢亲自动手制作一些东西，从中得到乐趣", dim:"R", on:"yes"},
+  {id:23, text:"我的动手能力很差", dim:"R", on:"no"},
+  {id:24, text:"和不熟悉的人交谈对我来说毫不困难", dim:"E", on:"yes"},
+  {id:25, text:"和别人谈判时，我总是很容易放弃自己的观点", dim:"E", on:"no"},
+  {id:26, text:"我很容易结识同性别朋友", dim:"S", on:"yes"},
+  {id:27, text:"对于社会问题，我通常持中庸的态度", dim:"S", on:"no"},
+  {id:28, text:"当我开始做一件事情后，即使碰到再多的困难，我也要执着地干下去", dim:"E", on:"yes"},
+  {id:29, text:"我是一个沉静而不易动感情的人", dim:"C", on:"yes"},
+  {id:30, text:"当我工作时，我喜欢避免干扰", dim:"I", on:"yes"},
+  {id:31, text:"我的理想是当一名科学家", dim:"I", on:"yes"},
+  {id:32, text:"与言情小说相比，我更喜欢推理小说", dim:"A", on:"no"},
+  {id:33, text:"有些人太霸道，有时明明知道他们是对的，也要和他们对着干", dim:"A", on:"yes"},
+  {id:34, text:"我爱幻想", dim:"A", on:"yes"},
+  {id:35, text:"我总是主动地向别人提出自己的建议", dim:"E", on:"yes"},
+  {id:36, text:"我喜欢使用榔头、钳子、改锥、螺丝刀等一类的工具", dim:"R", on:"yes"},
+  {id:37, text:"我乐于解除别人的痛苦 / 乐于助人", dim:"S", on:"yes"},
+  {id:38, text:"我更喜欢自己下了赌注的比赛或游戏", dim:"E", on:"yes"},
+  {id:39, text:"我喜欢按部就班地完成要做的工作", dim:"C", on:"yes"},
+  {id:40, text:"我希望能经常换不同的工作来做", dim:"C", on:"no"},
+  {id:41, text:"我总留有充裕的时间去赴约会", dim:"C", on:"yes"},
+  {id:42, text:"我喜欢阅读自然科学方面的书籍和杂志", dim:"I", on:"yes"},
+  {id:43, text:"如果掌握一门手艺并能以此为生，我会感到非常满意", dim:"R", on:"yes"},
+  {id:44, text:"我对汽车司机、汽车修理工职业比较感兴趣", dim:"R", on:"no"},
+  {id:45, text:'听别人谈"家中被盗"一类的事，很难引起我的同情', dim:"S", on:"no"},
+  {id:46, text:"如果待遇相同，我宁愿当商品推销员，而不愿当图书管理员", dim:"E", on:"yes"},
+  {id:47, text:"我讨厌跟各类机械打交道", dim:"R", on:"no"},
+  {id:48, text:"我小时候经常把玩具拆开，把里面看个究竟", dim:"R", on:"no"},
+  {id:49, text:"当接受新任务后，我喜欢以自己的独特方法去完成它", dim:"A", on:"yes"},
+  {id:50, text:"我有文艺方面的天赋", dim:"A", on:"yes"},
+  {id:51, text:"我喜欢把一切安排得整整齐齐、井井有条", dim:"C", on:"yes"},
+  {id:52, text:"我喜欢作一名教师", dim:"S", on:"yes"},
+  {id:53, text:"和一群人在一起的时候，我总想不出恰当的话来说", dim:"S", on:"no"},
+  {id:54, text:"看情感影片时，我常禁不住眼圈红润", dim:"A", on:"yes"},
+  {id:55, text:"我讨厌学数学", dim:"I", on:"no"},
+  {id:56, text:"在实验室里独自做实验会令我寂寞难耐", dim:"I", on:"no"},
+  {id:57, text:"对于急躁、爱发脾气的人，我仍能以礼相待", dim:"C", on:"yes"},
+  {id:58, text:"遇到难解答的问题时，我常常放弃", dim:"I", on:"no"},
+  {id:59, text:"大家公认我是一名勤劳踏实的、愿为大家服务的人", dim:"S", on:"yes"},
+  {id:60, text:"我喜欢在人事部门工作 / 喜欢协助老师做班级管理类的工作", dim:"E", on:"yes"}
+];
+
+const DIM_NAMES = {
+  R: {name:"现实型", emoji:"🔴", tag:"实干家", color:"#EF4444", desc:"喜欢动手操作，用双手创造价值"},
+  I: {name:"研究型", emoji:"🟢", tag:"思考家", color:"#22C55E", desc:"热爱探索真理，享受独立思考"},
+  A: {name:"艺术型", emoji:"🟣", tag:"创造者", color:"#8B5CF6", desc:"用创意表达自我，追求美与独特"},
+  S: {name:"社会型", emoji:"🤝", tag:"帮助者", color:"#3B82F6", desc:"以帮助他人成长为己任，温暖而有力量"},
+  E: {name:"企业型", emoji:"💼", tag:"说服者", color:"#F59E0B", desc:"敢于冒险领导他人，追求成就与影响力"},
+  C: {name:"常规型", emoji:"📊", tag:"组织者", color:"#06B6D4", desc:"有条不紊地管理数据与流程，是团队稳定的基石"}
+};
+
+// 六边形相邻关系
+const HEXAGON = ["R","I","A","S","E","C"];
+const ADJACENT = {R:["I","C"], I:["R","A"], A:["I","S"], S:["A","E"], E:["S","C"], C:["E","R"]};
+const OPPOSITE = {R:"S", I:"E", A:"C", S:"R", E:"I", C:"A"};
+
+// 类型详细描述
+const TYPE_DETAIL = {
+  R: {
+    traits:"坦率、诚实、谦逊、自然、坚毅、实际、温和、节俭、害羞",
+    likes:"动手操作工具/机械、户外工作、体育运动、与动植物打交道",
+    dislikes:"抽象理论研究、大量社交应酬、长篇大论的文书",
+    strengths:"动手操作、机械理解、空间感知、身体协调",
+    majors:"机械工程、电气工程、土木工程、建筑学、体育教育、动物医学、园林",
+    careers:"工程师、技术员、飞行员、消防员、运动员、厨师、机械师、测量员",
+    advice:"多参加动手实践类活动（模型制作、实验操作、体育竞技），在学习中注重理论与实操的结合"
+  },
+  I: {
+    traits:"分析、谨慎、批评、好奇、独立、理性、内向、精确、有方法",
+    likes:"解决抽象问题、做研究实验、阅读学术书籍、思考复杂理论",
+    dislikes:"重复性劳动、过多的社交活动、缺乏逻辑依据的决策",
+    strengths:"逻辑推理、数学思维、科学方法、批判性思维",
+    majors:"数学、物理、化学、生物科学、计算机科学、临床医学、药学、心理学",
+    careers:"科学家、研究员、大学教授、医生、数据分析师、AI算法工程师、化学分析师",
+    advice:"多参加学科竞赛（奥赛、建模）、科研项目、编程实践，培养深度阅读和批判性思维习惯"
+  },
+  A: {
+    traits:"复杂、无序、情绪化、理想化、想象力丰富、不实际、冲动、独立、内省、直觉",
+    likes:"用文字/声音/色彩/形体表达，创作独特作品，自由发挥想象",
+    dislikes:"严格规则、重复流程、高度结构化的工作环境",
+    strengths:"创造力、审美能力、表达能力、艺术感知",
+    majors:"中文、新闻传播、设计学（平面/服装/室内/工业）、音乐表演、美术学、广告学、戏剧影视",
+    careers:"作家、设计师、音乐家、摄影师、导演、记者、广告创意、建筑师（偏设计）",
+    advice:"多参与艺术创作、文学写作、设计比赛，保留并展示作品集（Portfolio），尝试跨领域融合创作"
+  },
+  S: {
+    traits:"有说服力、慷慨、乐于助人、善良、耐心、善于合作、善解人意、友好、负责",
+    likes:"与人交流互动、教育培训、倾听关怀、团队协作、社会服务",
+    dislikes:"独自长时间工作、与机器或数据打交道、冷漠竞争的环境",
+    strengths:"沟通交流、共情倾听、团队协作、教导培训",
+    majors:"教育学、心理学、社会学、社会工作、护理学、临床医学、人力资源管理",
+    careers:"教师、心理咨询师、社工、护士、医生、人力资源经理、职业规划师、公益组织工作者",
+    advice:"多参与志愿服务、社团组织、助教活动，培养沟通与组织能力，适当学习心理学知识"
+  },
+  E: {
+    traits:"冒险、雄心勃勃、独断、精力旺盛、冲动、乐观、自信、社交、健谈",
+    likes:"领导团队、说服他人、商业谈判、制定目标、承担风险、竞争取胜",
+    dislikes:"长时间研究细节、缺乏话语权、按部就班无挑战",
+    strengths:"领导力、演讲说服、决策判断、商业敏感度",
+    majors:"工商管理、市场营销、金融学、国际经济与贸易、法学、政治学、公共管理",
+    careers:"企业家、管理者、销售总监、律师、投资银行家、房地产经纪人、政治家",
+    advice:"多参与班干部竞选、辩论赛、商业模拟赛、创业实践，培养演讲和领导能力"
+  },
+  C: {
+    traits:"谨慎、顺从、有条理、坚毅、务实、高效、刻板、缺乏想象力、尽责",
+    likes:"处理数据信息、遵循明确规则、整理归纳、计划安排、精确计算",
+    dislikes:"模糊不清的任务、高风险决策、需要大量创造力的工作",
+    strengths:"组织规划、数据处理、细节管理、执行跟进",
+    majors:"会计学、财务管理、审计学、统计学、档案学、信息管理与信息系统、行政管理",
+    careers:"会计师、审计师、银行职员、行政助理、精算师、图书管理员、数据分析员",
+    advice:"培养数据管理技能（Excel/数据库），参加社团活动策划与后勤统筹，学习时间管理方法"
+  }
+};
+
+// 三码组合 → 职业推荐
+const CODE_CAREERS = {
+  "RIA":"建筑学、工业设计 → 建筑师、产品设计师、技术研发",
+  "RIS":"医学技术、环境科学 → 医生（外科）、化验员、环保工程师",
+  "RIE":"工程管理、土木工程 → 项目经理、工程监理、技术总监",
+  "RAI":"建筑设计、数字媒体 → 建筑设计师、UI/UX设计师",
+  "RSE":"体育管理、旅游管理 → 体育教练、导游、健身教练",
+  "IRC":"计算机科学、电子信息 → 程序员、电子工程师、测试工程师",
+  "IRA":"地理信息科学、生物医学 → GIS工程师、医疗器械设计",
+  "IAR":"心理学、认知科学 → 用户体验研究员、认知科学家",
+  "ISA":"临床医学、教育学 → 医生、教师、教育研究员",
+  "ISC":"药学、护理学 → 药剂师、临床护士、健康管理师",
+  "AIS":"新闻传播、艺术治疗 → 记者、艺术治疗师、策展人",
+  "ASE":"广告学、公共关系 → 广告创意总监、公关经理、活动策划",
+  "AES":"艺术管理、文化产业 → 艺术经纪人、文化项目经理",
+  "SEA":"教育管理、社会工作 → 校长、教育顾问、社区发展官",
+  "SEC":"人力资源、公共管理 → HR经理、公务员、培训师",
+  "SIA":"心理学、特殊教育 → 心理咨询师、康复治疗师",
+  "SAE":"传媒教育、国际关系 → 外交官、教育媒体人、文化参赞",
+  "EAS":"市场营销、传媒管理 → 市场总监、广告AE、媒体运营",
+  "ESC":"工商管理、行政管理 → 企业管理者、行政总监、政府官员",
+  "EIS":"经济学、法律 → 律师、经济分析师、企业顾问",
+  "CRI":"会计信息化、档案管理 → 数据分析师、档案管理员、审计师",
+  "CRS":"图书情报、文秘 → 图书管理员、行政秘书、档案员",
+  "CIE":"金融工程、信息管理 → 精算师、金融分析师、数据库管理员",
+  "CSE":"会计学、税务 → 注册会计师、税务师、银行经理"
+};
+
+// 选科建议
+const SUBJECT_ADVICE = {
+  R:{combo:"物理+化学+地理 / 物理+生物+地理", reason:"适合理工农林类专业"},
+  I:{combo:"物理+化学+生物 / 物理+化学+地理", reason:"传统理科组合，覆盖绝大部分理工医学专业"},
+  A:{combo:"历史+政治+地理 / 历史+地理+生物", reason:"适合人文社科和艺术设计类专业"},
+  S:{combo:"历史+政治+生物 / 物理+化学+生物（医学）", reason:"适合教育、心理、医学等助人专业"},
+  E:{combo:"物理+政治+地理 / 历史+政治+地理", reason:"覆盖商科、法学、管理类专业"},
+  C:{combo:"物理+政治+地理 / 不限", reason:"商科和管理学对选科要求较宽"}
+};
+
+// 课外活动推荐
+const ACTIVITIES = {
+  R:"机器人社团、模型制作、户外探险、科学实验营、体育竞技",
+  I:"学科竞赛（数学/物理/信息学）、科普阅读、编程俱乐部、科研夏令营",
+  A:"文学社、音乐/戏剧社团、绘画/设计兴趣班、校报/新媒体运营",
+  S:"志愿者服务、支教活动、学生会/班委、辩论队、心理社团",
+  E:"模拟联合国、商业挑战赛、演讲俱乐部、创业实践、学生公司",
+  C:"Excel/编程学习、活动后勤统筹、理财记账实践、图书管理员体验"
+};
+
+// ==================== 状态管理 ====================
+const QUESTIONS_PER_PAGE = 10;
+let currentPage = 0;
+const totalPages = Math.ceil(QUESTIONS.length / QUESTIONS_PER_PAGE);
+let answers = {}; // {questionId: "yes"|"no"}
+
+// ==================== 导航 ====================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ==================== 基本信息 ====================
+function selectRadio(el, groupId) {
+  document.querySelectorAll('#' + groupId + ' .radio-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function getRadioVal(groupId) {
+  const sel = document.querySelector('#' + groupId + ' .radio-btn.selected');
+  return sel ? sel.dataset.value : '';
+}
+
+function goQuestions() {
+  // 基本信息非必填，直接进入
+  currentPage = 0;
+  answers = {};
+  showSection('sec-questions');
+  renderQuestionPage();
+}
+
+// ==================== 渲染题目 ====================
+function renderQuestionPage() {
+  const start = currentPage * QUESTIONS_PER_PAGE;
+  const end = Math.min(start + QUESTIONS_PER_PAGE, QUESTIONS.length);
+  const pageQuestions = QUESTIONS.slice(start, end);
+
+  // 更新进度
+  const stepNum = currentPage + 2; // 步骤2开始
+  document.getElementById('qp-label').textContent = `📋 第${start+1}-${end}题`;
+  document.getElementById('qp-step').textContent = `步骤 ${stepNum} / ${totalPages+2}`;
+  document.getElementById('qp-fill').style.width = ((stepNum-1) / (totalPages+2) * 100) + '%';
+
+  let html = '';
+  pageQuestions.forEach(q => {
+    const val = answers[q.id] || '';
+    html += `
+    <div class="card" style="padding:14px 16px;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span class="q-num">${q.id}</span>
+        <div style="flex:1;">
+          <p class="q-text">${q.text}</p>
+          <div class="q-options">
+            <div class="q-option yes ${val==='yes'?'selected':''}" onclick="setAnswer(${q.id},'yes',this)">✅ 是</div>
+            <div class="q-option no ${val==='no'?'selected':''}" onclick="setAnswer(${q.id},'no',this)">❌ 否</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('questions-container').innerHTML = html;
+
+  // 导航按钮
+  let navHtml = '';
+  if (currentPage > 0) {
+    navHtml += '<button class="btn btn-outline" onclick="prevPage()">← 上一页</button>';
+  } else {
+    navHtml += '<button class="btn btn-outline" onclick="showSection(\'sec-info\')">← 返回</button>';
+  }
+  if (currentPage < totalPages - 1) {
+    navHtml += '<button class="btn btn-primary" onclick="nextPage()">下一页 →</button>';
+  } else {
+    navHtml += '<button class="btn btn-primary" id="btn-submit" onclick="submitAll()">查看结果 🎯</button>';
+  }
+  document.getElementById('q-nav').innerHTML = navHtml;
+}
+
+function setAnswer(qid, val, el) {
+  answers[qid] = val;
+  // 更新UI
+  const card = el.parentElement;
+  card.querySelector('.yes').classList.toggle('selected', val==='yes');
+  card.querySelector('.no').classList.toggle('selected', val==='no');
+}
+
+function prevPage() {
+  if (currentPage > 0) { currentPage--; renderQuestionPage(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+function nextPage() {
+  // 检查当前页是否全部作答
+  const start = currentPage * QUESTIONS_PER_PAGE;
+  const end = Math.min(start + QUESTIONS_PER_PAGE, QUESTIONS.length);
+  const unanswered = [];
+  for (let i = start; i < end; i++) {
+    if (!answers[QUESTIONS[i].id]) unanswered.push(QUESTIONS[i].id);
+  }
+  if (unanswered.length > 0) {
+    alert(`还有 ${unanswered.length} 题未作答（题号：${unanswered.join(', ')}），请全部答完再翻页哦~`);
+    return;
+  }
+  currentPage++;
+  renderQuestionPage();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ==================== 提交与计分 ====================
+function submitAll() {
+  // 检查最后一页
+  const start = currentPage * QUESTIONS_PER_PAGE;
+  const end = Math.min(start + QUESTIONS_PER_PAGE, QUESTIONS.length);
+  const unanswered = [];
+  for (let i = start; i < end; i++) {
+    if (!answers[QUESTIONS[i].id]) unanswered.push(QUESTIONS[i].id);
+  }
+  // 也检查前面页（以防万一）
+  for (let i = 0; i < start; i++) {
+    if (!answers[QUESTIONS[i].id]) unanswered.push(QUESTIONS[i].id);
+  }
+  if (unanswered.length > 0) {
+    alert(`还有 ${unanswered.length} 题未作答（题号：${unanswered.slice(0,10).join(', ')}${unanswered.length>10?'...':''}），请全部答完再查看结果~`);
+    return;
+  }
+
+  // 计算分数
+  const scores = {R:0, I:0, A:0, S:0, E:0, C:0};
+  QUESTIONS.forEach(q => {
+    const userAns = answers[q.id];
+    if (userAns === q.on) {
+      scores[q.dim]++;
+    }
+  });
+
+  // 排序得霍兰德代码
+  const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+  const hc = sorted.slice(0,3).map(e => e[0]).join('');
+  const hcNames = sorted.slice(0,3).map(e => DIM_NAMES[e[0]].name).join(' + ');
+
+  // 分化度
+  const maxScore = sorted[0][1];
+  const minScore = sorted[5][1];
+  const diff = maxScore - minScore;
+
+  // 一致性
+  const top1 = sorted[0][0];
+  const top2 = sorted[1][0];
+  let consistency = '';
+  if (ADJACENT[top1] && ADJACENT[top1].includes(top2)) consistency = '高（相邻）';
+  else if (OPPOSITE[top1] === top2) consistency = '低（相对）';
+  else consistency = '中（相隔）';
+
+  // 渲染结果
+  showSection('sec-results');
+  renderResults(scores, hc, hcNames, diff, consistency, sorted);
+}
+
+function renderResults(scores, hc, hcNames, diff, consistency, sorted) {
+  // 霍兰德代码展示
+  const hcDisplay = document.getElementById('hc-display');
+  hcDisplay.innerHTML = hc.split('').map(c =>
+    `<div class="hc-letter ${c.toLowerCase()}">${c}</div>`
+  ).join('');
+  document.getElementById('hc-types').textContent = hcNames;
+
+  // 分数条
+  const dims = ["R","I","A","S","E","C"];
+  let barsHtml = '';
+  dims.forEach(d => {
+    const s = scores[d];
+    const info = DIM_NAMES[d];
+    barsHtml += `
+    <div class="score-row">
+      <span class="score-label"><span class="score-dot" style="background:${info.color}"></span>${info.emoji} ${d}</span>
+      <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${s*10}%;background:${info.color}"></div></div>
+      <span class="score-val">${s}/10</span>
+    </div>`;
+  });
+  document.getElementById('score-bars').innerHTML = barsHtml;
+
+  // 雷达图
+  setTimeout(() => drawRadar(scores), 200);
+
+  // 质量分析
+  let diffLevel = diff >= 5 ? '高分化 — 兴趣方向非常明确，有明显偏好' :
+                  diff >= 3 ? '中分化 — 兴趣有一定方向，但不够集中' :
+                  '低分化 — 兴趣广泛或尚未明确，建议多做职业体验';
+  let diffAdvice = diff >= 5 ? '坚定围绕主导类型进行深度探索' :
+                   diff >= 3 ? '在前两三个类型中继续探索和比较' :
+                   '建议做更多职业体验和实地参访，不急于定位';
+  document.getElementById('quality-analysis').innerHTML = `
+    <table style="width:100%;font-size:13px;border-collapse:collapse;">
+      <tr><td style="padding:6px;font-weight:600;">分化度</td><td style="padding:6px;">${diff} 分（${diffLevel}）</td></tr>
+      <tr><td style="padding:6px;font-weight:600;">一致性</td><td style="padding:6px;">${consistency}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;">建议</td><td style="padding:6px;">${diffAdvice}</td></tr>
+    </table>`;
+
+  // 类型解读标签
+  const tabsHtml = sorted.slice(0,3).map((e,i) => {
+    const info = DIM_NAMES[e[0]];
+    return `<div class="tab ${i===0?'active':''}" onclick="showTypeTab('${e[0]}',this)">${info.emoji} ${info.name}</div>`;
+  }).join('');
+  document.getElementById('type-tabs').innerHTML = tabsHtml;
+  showTypeTab(sorted[0][0], document.querySelector('#type-tabs .tab'));
+
+  // 职业推荐
+  let careerHtml = '';
+  const exactMatch = CODE_CAREERS[hc];
+  if (exactMatch) {
+    const parts = exactMatch.split(' → ');
+    careerHtml += `<p style="font-weight:700;margin-bottom:8px;">📌 你的三码组合 <strong>${hc}</strong>：</p>`;
+    careerHtml += `<p>🎓 <strong>推荐专业：</strong>${parts[0]}</p>`;
+    careerHtml += `<p>💼 <strong>推荐职业：</strong>${parts[1]}</p>`;
+  } else {
+    // 找近似匹配
+    const topDim = sorted[0][0];
+    careerHtml += `<p style="font-weight:700;margin-bottom:8px;">📌 你的主导类型：<strong>${DIM_NAMES[topDim].name}（${topDim}型）</strong></p>`;
+    careerHtml += `<p>🎓 <strong>推荐专业大类：</strong>${TYPE_DETAIL[topDim].majors}</p>`;
+    careerHtml += `<p>💼 <strong>典型职业：</strong>${TYPE_DETAIL[topDim].careers}</p>`;
+  }
+  document.getElementById('career-recommend').innerHTML = careerHtml;
+
+  // 选科建议
+  const topDimSub = sorted[0][0];
+  const subInfo = SUBJECT_ADVICE[topDimSub];
+  document.getElementById('subject-recommend').innerHTML = `
+    <p>🎓 <strong>推荐组合：</strong>${subInfo.combo}</p>
+    <p style="margin-top:4px;color:var(--text-secondary);">📝 ${subInfo.reason}</p>
+    <p style="margin-top:8px;font-size:12px;color:#94A3B8;">注：具体选科需参考所在省份的高考政策及各高校专业选科要求。</p>`;
+
+  // 活动建议（取前三）
+  const actHtml = sorted.slice(0,3).map(e =>
+    `<p style="margin-bottom:4px;">${DIM_NAMES[e[0]].emoji} <strong>${DIM_NAMES[e[0]].name}：</strong>${ACTIVITIES[e[0]]}</p>`
+  ).join('');
+  document.getElementById('activity-recommend').innerHTML = actHtml;
+}
+
+function showTypeTab(dim, el) {
+  document.querySelectorAll('#type-tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const info = DIM_NAMES[dim];
+  const detail = TYPE_DETAIL[dim];
+  document.getElementById('type-detail').innerHTML = `
+    <div class="type-card" style="border-left-color:${info.color}">
+      <h4>${info.emoji} ${info.name}（${dim}型）— ${info.tag}</h4>
+      <p style="margin-top:4px;">${info.desc}</p>
+    </div>
+    <table style="width:100%;font-size:13px;border-collapse:collapse;margin-top:8px;">
+      <tr><td style="padding:6px;font-weight:600;width:80px;vertical-align:top;">人格特质</td><td style="padding:6px;">${detail.traits}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;vertical-align:top;">喜欢的事</td><td style="padding:6px;">${detail.likes}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;vertical-align:top;">不喜欢的事</td><td style="padding:6px;">${detail.dislikes}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;vertical-align:top;">优势能力</td><td style="padding:6px;">${detail.strengths}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;vertical-align:top;">大学专业</td><td style="padding:6px;">${detail.majors}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;vertical-align:top;">典型职业</td><td style="padding:6px;">${detail.careers}</td></tr>
+      <tr><td style="padding:6px;font-weight:600;vertical-align:top;">成长建议</td><td style="padding:6px;">${detail.advice}</td></tr>
+    </table>`;
+}
+
+// ==================== 雷达图 ====================
+let radarInstance = null;
+function drawRadar(scores) {
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  if (radarInstance) radarInstance.destroy();
+  const dims = ["R","I","A","S","E","C"];
+  radarInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: dims.map(d => DIM_NAMES[d].emoji + ' ' + DIM_NAMES[d].name),
+      datasets: [{
+        label: '你的得分',
+        data: dims.map(d => scores[d]),
+        backgroundColor: 'rgba(79,110,247,0.2)',
+        borderColor: 'rgba(79,110,247,0.8)',
+        borderWidth: 2,
+        pointBackgroundColor: dims.map(d => DIM_NAMES[d].color),
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 10,
+          ticks: { stepSize: 2, font: { size: 11 } },
+          pointLabels: { font: { size: 12, weight: 'bold' } }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+// ==================== 重新开始 ====================
+function restartAll() {
+  answers = {};
+  currentPage = 0;
+  document.querySelectorAll('.radio-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('info-name').value = '';
+  document.getElementById('info-age').value = '';
+  document.getElementById('info-grade').value = '';
+  if (radarInstance) { radarInstance.destroy(); radarInstance = null; }
+  showSection('sec-welcome');
+}
+
+// ==================== 初始化 ====================
+showSection('sec-welcome');
+</script>
+</body>
+</html>
